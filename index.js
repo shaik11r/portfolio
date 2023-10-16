@@ -6,9 +6,7 @@ const nodemailer = require("nodemailer");
 const bodyparser = require("body-parser");
 app.use(bodyparser.json());
 app.use(cors());
-app.get("/", (req, res) => {
-  res.send("hi from server");
-});
+
 app.listen(5000, () => console.log("server running"));
 const contactEmail = nodemailer.createTransport({
   service: "gmail",
@@ -25,10 +23,22 @@ contactEmail.verify((error) => {
   }
 });
 app.post("/contact", (req, res) => {
-  const name = req.body.firstName + req.body.lastName;
+  if (!req.body) {
+    return res.send({
+      status: 400,
+      message: "error body cant be empty",
+    });
+  }
+  const name = req.body.firstName.trim() + req.body.lastName.trim();
   const email = req.body.email;
   const message = req.body.message;
   const phone = req.body.phone;
+  if (phone.size < 9) {
+    return res.send({
+      status: 400,
+      message: "phone number cant be less than 10",
+    });
+  }
   const mail = {
     from: name,
     to: "nadeencool11@gmail.com",
